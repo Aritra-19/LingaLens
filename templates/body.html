@@ -1,0 +1,764 @@
+<!-- body.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LingaLens</title>
+    <style>
+        /* All your existing styles remain the same */
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            color: #ffffff;
+            line-height: 1.7;
+            background-image: url(static/bg2.jpg);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+
+        /* Navigation Bar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 5%;
+            background: rgba(58, 28, 113, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.6rem 1.4rem;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .sign-up {
+            background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);
+            color: #2d3748;
+            border: none;
+        }
+
+        .sign-up:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .sign-in {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid white;
+            backdrop-filter: blur(5px);
+        }
+
+        .sign-in:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+        }
+
+        .log-out {
+            background: rgba(248, 215, 218, 0.8);
+            color: #721c24;
+            border: none;
+            display: none; /* Initially hidden */
+        }
+
+        .log-out:hover {
+            background: rgba(248, 215, 218, 0.9);
+            transform: translateY(-3px);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content-wrapper {
+            display: flex;
+            gap: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .left-column, .right-column {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .left-column:hover, .right-column:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .left-column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, rgba(58, 28, 113, 0.8) 0%, rgba(215, 109, 119, 0.8) 100%);
+        }
+
+        .right-column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, rgba(215, 109, 119, 0.8) 0%, rgba(255, 175, 123, 0.8) 100%);
+        }
+
+        .column-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            position: relative;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .column-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+            border-radius: 2px;
+        }
+
+        .content-text {
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 1.5rem;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Modal Forms */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            animation: modalFadeIn 0.4s;
+        }
+
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .close {
+            color: #ffffff;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #ff6b6b;
+            text-decoration: none;
+            cursor: pointer;
+            transform: scale(1.1);
+        }
+
+        .form-title {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: rgba(0, 201, 255, 0.6);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(0, 201, 255, 0.2);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);
+            color: #2d3748;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Status message */
+        .status-message {
+            padding: 0.75rem;
+            margin-top: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error-message {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #ff6b6b;
+            border: 1px solid rgba(220, 53, 69, 0.25);
+        }
+
+        .success-message {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #75f0a0;
+            border: 1px solid rgba(40, 167, 69, 0.25);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+
+            .nav-buttons {
+                gap: 0.5rem;
+            }
+
+            .nav-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .logo {
+                font-size: 1.6rem;
+            }
+
+            .column-title {
+                font-size: 1.5rem;
+            }
+
+            .content-text {
+                font-size: 1rem;
+            }
+
+            .modal-content {
+                margin: 20% auto;
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Welcome Page (shown after login) */
+        #welcome-page {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .user-info {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="#" class="logo">LingaLens</a>
+        <div class="nav-buttons">
+            <button class="nav-btn sign-up" id="signUpBtn">Sign Up</button>
+            <button class="nav-btn sign-in" id="signInBtn">Sign In</button>
+            <button class="nav-btn log-out" id="logOutBtn">Log Out</button>
+        </div>
+    </nav>
+
+      <!-- Main Content -->
+      <div class="container" id="main-content">
+        <div class="content-wrapper">
+            <!-- Left Column -->
+            <!-- Left Column -->
+<div class="left-column">
+    <h2 class="column-title">Project Overview</h2>
+    <p class="content-text">
+        This project aims to create a multilingual text translation system that extracts and converts text from images, audio, or plain text. By integrating Optical Character Recognition (OCR), Automatic Speech Recognition (ASR), and Natural Language Processing (NLP), the solution breaks communication barriers and provides real-time multilingual support for users.
+    </p>
+    <p class="content-text">
+        <strong>Purpose:</strong> To facilitate users, including travelers, students, and businesses, in understanding and translating text seamlessly.  
+        <strong>Scope:</strong> The system provides real-time translations, a simple interface, and support for text extracted from diverse input formats.
+    </p>
+</div>
+
+
+            <!-- Right Column -->
+            <!-- Right Column -->
+<div class="right-column">
+    <h2 class="column-title">Project Details</h2>
+    <p class="content-text">
+        <strong>Technologies Used:</strong>
+        <ul>
+            <li><strong>OCR:</strong> For image-to-text conversion using tools like the Tesseract library.</li>
+            <li><strong>ASR:</strong> For speech-to-text transcription with Python-based speech recognition.</li>
+            <li><strong>NLP:</strong> To enable machine translation using deep learning techniques like LSTM and BERT.</li>
+            <li><strong>Frontend:</strong> HTML, CSS, JavaScript, React.js.</li>
+            <li><strong>Backend:</strong> Node.js, Express.js.</li>
+        </ul>
+    </p>
+    <p class="content-text">
+        <strong>Additional Features:</strong>  
+        The project may include advanced NLP features like text summarization and enhancement through ChatGPT APIs.
+    </p>
+</div>
+
+</div> <!-- Closing div for class="content-wrapper" -->
+</div> <!-- Closing div for the "Main Content" container -->
+
+<!-- Add the Group Details Container Here -->
+<div class="container">
+    <div class="content-wrapper">
+        <div class="left-column">
+            <h2 class="column-title">Group Details</h2>
+            <p class="content-text">
+                <strong>Members:</strong><br>
+                1. Aritra Bag - 22052194<br>
+                2. Sraman Dutta Bar - 22052336<br>
+                3. Rahul Raj - 22053267<br>
+                4. Sayan Hazra - 22053277<br>
+                5. Subhankar Dey - 22053292<br>
+            </p>
+            <p class="content-text">
+                <strong>Project Supervisor:</strong><br>
+                Santwana Sagnika
+            </p>
+        </div>
+    </div>
+</div>
+
+
+        </div>
+    </div>
+
+    <!-- Welcome Page -->
+    <div class="container" id="welcome-page">
+        <h1 class="welcome-title">Welcome to LingaLens</h1>
+        <p class="welcome-message">You are now logged in to your account.</p>
+        <div class="user-info">
+            <h3 id="user-name"></h3>
+            <p id="user-email"></p>
+        </div>
+        <button class="nav-btn sign-up" onclick="location.href='/converter'">Go to Converter</button>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div id="signUpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeSignUp">&times;</span>
+            <h2 class="form-title">Create Account</h2>
+            <form id="signUpForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password" required>
+                </div>
+                <div class="status-message" id="signupStatus"></div>
+                <button type="submit" class="submit-btn">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sign In Modal -->
+    <div id="signInModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeSignIn">&times;</span>
+            <h2 class="form-title">Sign In</h2>
+            <form id="signInForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" class="form-control" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <div class="status-message" id="signinStatus"></div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get modal elements
+        const signUpModal = document.getElementById("signUpModal");
+        const signInModal = document.getElementById("signInModal");
+        
+        // Get buttons
+        const signUpBtn = document.getElementById("signUpBtn");
+        const signInBtn = document.getElementById("signInBtn");
+        const logOutBtn = document.getElementById("logOutBtn");
+        
+        // Get close buttons
+        const closeSignUp = document.getElementById("closeSignUp");
+        const closeSignIn = document.getElementById("closeSignIn");
+        
+        // Get forms
+        const signUpForm = document.getElementById("signUpForm");
+        const signInForm = document.getElementById("signInForm");
+        
+        // Get status message elements
+        const signupStatus = document.getElementById("signupStatus");
+        const signinStatus = document.getElementById("signinStatus");
+        
+        // Get pages
+        const mainContent = document.getElementById("main-content");
+        const welcomePage = document.getElementById("welcome-page");
+        
+        // Check if user is already logged in (via session)
+        function checkLoginStatus() {
+            // This would normally check a session cookie or token
+            // For demo purposes, we'll check localStorage
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                // Update UI for logged in user
+                document.getElementById("user-name").textContent = user.name;
+                document.getElementById("user-email").textContent = user.email;
+                
+                // Show welcome page instead of main content
+                mainContent.style.display = "none";
+                welcomePage.style.display = "block";
+                
+                // Update navigation buttons
+                signUpBtn.style.display = "none";
+                signInBtn.style.display = "none";
+                logOutBtn.style.display = "inline-block";
+            }
+        }
+        
+        // Check login status on page load
+        window.onload = function() {
+            checkLoginStatus();
+        };
+        
+        // Open sign up modal
+        signUpBtn.onclick = function() {
+            signUpModal.style.display = "block";
+        }
+        
+        // Open sign in modal
+        signInBtn.onclick = function() {
+            signInModal.style.display = "block";
+        }
+        
+        // Close sign up modal
+        closeSignUp.onclick = function() {
+            signUpModal.style.display = "none";
+            signupStatus.style.display = "none"; // Hide any status messages
+        }
+        
+        // Close sign in modal
+        closeSignIn.onclick = function() {
+            signInModal.style.display = "none";
+            signinStatus.style.display = "none"; // Hide any status messages
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target == signUpModal) {
+                signUpModal.style.display = "none";
+                signupStatus.style.display = "none";
+            }
+            if (event.target == signInModal) {
+                signInModal.style.display = "none";
+                signinStatus.style.display = "none";
+            }
+        }
+        
+        // Show status message
+        function showStatusMessage(element, message, isError) {
+            element.textContent = message;
+            element.className = "status-message " + (isError ? "error-message" : "success-message");
+            element.style.display = "block";
+        }
+        
+        // Handle sign up form submission
+        signUpForm.onsubmit = function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            
+            // Basic validation
+            if (password !== confirmPassword) {
+                showStatusMessage(signupStatus, "Passwords do not match!", true);
+                return;
+            }
+            
+            // Create user object
+            const userData = {
+                name,
+                email,
+                phone,
+                password
+            };
+            
+            // Send data to server
+            fetch('/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showStatusMessage(signupStatus, data.message, false);
+                    // Clear form
+                    signUpForm.reset();
+                    // Close modal after a short delay
+                    setTimeout(() => {
+                        signUpModal.style.display = "none";
+                        signupStatus.style.display = "none";
+                    }, 2000);
+                } else {
+                    showStatusMessage(signupStatus, data.message, true);
+                }
+            })
+            .catch(error => {
+                showStatusMessage(signupStatus, "An error occurred. Please try again.", true);
+                console.error('Error:', error);
+            });
+        }
+        
+        // Handle sign in form submission
+        signInForm.onsubmit = function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+            
+            const loginData = {
+                email,
+                password
+            };
+            
+            // Send login request to server
+            fetch('/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showStatusMessage(signinStatus, data.message, false);
+                    
+                    // Store user info in localStorage
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Update UI
+                    setTimeout(() => {
+                        signInModal.style.display = "none";
+                        signinStatus.style.display = "none";
+                        
+                        // Redirect to converter page
+                        window.location.href = '/converter';
+                    }, 1000);
+                } else {
+                    showStatusMessage(signinStatus, data.message, true);
+                }
+            })
+            .catch(error => {
+                showStatusMessage(signinStatus, "An error occurred. Please try again.", true);
+                console.error('Error:', error);
+            });
+        }
+        
+        // Handle logout
+        logOutBtn.onclick = function() {
+            // Send logout request to server
+            fetch('/logout', {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear local storage
+                    localStorage.removeItem('user');
+                    
+                    // Update UI
+                    mainContent.style.display = "block";
+                    welcomePage.style.display = "none";
+                    
+                    signUpBtn.style.display = "inline-block";
+                    signInBtn.style.display = "inline-block";
+                    logOutBtn.style.display = "none";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred during logout. Please try again.");
+            });
+        }
+    </script>
+</body>
+</html>

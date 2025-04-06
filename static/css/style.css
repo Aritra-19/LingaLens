@@ -1,0 +1,133 @@
+/* Base styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7;
+    color: #333;
+  }
+  
+  .title {
+    text-align: center;
+    font-size: 2rem;
+    margin-top: 1rem;
+  }
+  
+  .logout-container {
+    text-align: right;
+    padding: 10px;
+  }
+  
+  .logout-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .popup {
+    display: none;
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    border-radius: 5px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .left-pane, .right-pane {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1 1 300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-button {
+    display: block;
+    margin-bottom: 15px;
+    padding: 10px;
+    width: 100%;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  select, button {
+    padding: 10px;
+    font-size: 1rem;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  .text-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin: 20px;
+    gap: 20px;
+  }
+  
+  .text-box {
+    background-color: white;
+    padding: 20px;
+    flex: 1 1 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-box h3 {
+    margin-top: 0;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .container, .text-container {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .logout-container {
+      text-align: center;
+    }
+  
+    .logout-btn {
+      width: 90%;
+      margin: 0 auto;
+    }
+  
+    .text-button {
+      font-size: 1rem;
+    }
+  
+    .title {
+      font-size: 1.5rem;
+    }
+  }
