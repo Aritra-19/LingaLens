@@ -1,0 +1,91 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Language Converter</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/style.css">
+    <script src="../static/js/script.js" defer></script>
+    
+  </head>
+  <body>
+   <!-- Logout Button -->
+   <div class="logout-container">
+    <button class="logout-btn" onclick="logout()">
+      <i class="fa fa-sign-out"></i> Logout
+    </button>
+  </div>
+  
+  <!-- Logout Success Popup -->
+  <div id="logout-popup" class="popup">
+    You have successfully logged out
+  </div>
+  
+  <!-- Main Heading -->
+  <div class="title">Language Converter</div>
+
+  <!-- First Container (A & B) -->
+  <div class="container">
+    <!-- Left Pane (Box A) -->
+    <div class="left-pane">
+      <button onclick="showUploadField('pdf')" class="text-button">
+        <i class="fa fa-file-pdf-o" style="font-size: 20px"></i>Upload PDF
+      </button>
+      <button onclick="showUploadField('image')" class="text-button">
+        <i class="bi bi-upload"></i> Upload Image
+      </button>
+      <button onclick="enterText()" class="text-button">
+        <i class="material-icons">&#xe8e2;</i> Enter Text
+      </button>
+    </div>
+
+    <!-- Right Pane (Box B) -->
+    <div class="right-pane">
+      <div id="upload-section" class="hidden">
+        <input type="file" id="file-upload" />
+      </div>
+      <div class="options">
+        <select id="language">
+          <option value="en">English</option>
+          <option value="hi">Hindi</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="bn">Bengali</option>
+          <option value="Od">Odia</option>
+        </select>
+        <button onclick="submitData()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second Container (C & D) -->
+  <div class="text-container">
+    <div class="text-box" id="box-c">
+      <h3>Original Text</h3>
+      <p id="original-text">Your scanned text will appear here...</p>
+    </div>
+    <div class="text-box">
+      <h3>Translated Text</h3>
+      <p id="translated-text">Your translated text will appear here...</p>
+    </div>
+  </div>
+    
+  </body>
+</html>
