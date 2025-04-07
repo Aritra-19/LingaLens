@@ -11,7 +11,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 from bson import json_util
 import tempfile
-from utils.pdf_processor import PDFProcessor
+# Import PDFTranslationSystem but handle potential import errors
+try:
+    from utils.pdftry import PDFTranslationSystem
+    PDF_TRANSLATOR_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import PDFTranslationSystem: {e}")
+    PDF_TRANSLATOR_AVAILABLE = False
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -32,13 +38,29 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Initialize translator
+# Initialize translator for non-PDF files and as fallback
 translator = Translator()
 
-# Initialize PDF processor
-# Set the path to Tesseract if needed, otherwise it will use the system's default
+# Set the path to Tesseract if needed
 tesseract_path = os.getenv('TESSERACT_CMD')  # Change this to your Tesseract path
-pdf_processor = PDFProcessor(tesseract_cmd=tesseract_path)
+if tesseract_path:
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
+
+# Simple PDF text extraction function as fallback
+def extract_text_from_pdf_fallback(pdf_path):
+    """Extract text from PDF using PyMuPDF as a fallback method"""
+    try:
+        import fitz  # PyMuPDF
+        doc = fitz.open(pdf_path)
+        text = ""
+        for page_num in range(len(doc)):
+            page = doc.load_page(page_num)
+            text += page.get_text()
+        return text
+    except ImportError:
+        return "PDF text extraction requires PyMuPDF (fitz) library."
+    except Exception as e:
+        return f"Error extracting text from PDF: {str(e)}"
 
 @app.route('/')
 def index():
@@ -134,20 +156,42 @@ def process_image():
             
             if file and allowed_file(file.filename):
                 # Use a secure temp file
-                with tempfile.NamedTemporaryFile(delete=False, dir=app.config['UPLOAD_FOLDER']) as tmp_file:
+                with tempfile.NamedTemporaryFile(delete=False, dir=app.config['UPLOAD_FOLDER'], suffix=os.path.splitext(file.filename)[1].lower()) as tmp_file:
                     file.save(tmp_file.name)
                     file_path = tmp_file.name
                 
                 try:
                     # Check if it's a PDF file
                     if file.filename.lower().endswith('.pdf'):
-                        # Process PDF file
-                        original_text = pdf_processor.extract_text_from_pdf(file_path)
+                        # Try to process PDF file using PDFTranslationSystem if available
+                        pdf_translation_successful = False
+                        
+                        if PDF_TRANSLATOR_AVAILABLE:
+                            try:
+                                # Initialize the system with the target language
+                                pdf_translator = PDFTranslationSystem(target_language=target_language, tesseract_cmd=tesseract_path)
+                                
+                                # Extract and translate the PDF
+                                result = pdf_translator.translate_pdf(file_path)
+                                original_text = result["original_text"]
+                                translated_text = result["translated_text"]
+                                pdf_translation_successful = True
+                                
+                                # Return early since we already have the translation
+                                return jsonify({
+                                    "original_text": original_text,
+                                    "translated_text": translated_text
+                                })
+                            except Exception as pdf_error:
+                                print(f"PDF translation system error: {pdf_error}")
+                                # Fall back to basic extraction
+                        
+                        # If PDFTranslationSystem failed or isn't available, use fallback method
+                        if not pdf_translation_successful:
+                            original_text = extract_text_from_pdf_fallback(file_path)
                     else:
-                        # Process image file
+                        # Process image file using pytesseract
                         img = Image.open(file_path)
-                        if tesseract_path:
-                            pytesseract.pytesseract.tesseract_cmd = tesseract_path
                         original_text = pytesseract.image_to_string(img)
                 finally:
                     # Always clean up the temp file
@@ -161,9 +205,10 @@ def process_image():
         else:
             return jsonify({"error": "No image or text provided"}), 400
         
-        # Translate the text if we have content
+        # Translate the text if we have content (for non-PDF content or fallback)
         if original_text.strip():
             try:
+                # Use googletrans for translation
                 translation = translator.translate(original_text, dest=target_language)
                 translated_text = translation.text
             except Exception as trans_error:
