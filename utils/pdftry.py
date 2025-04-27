@@ -263,7 +263,7 @@ def main():
     Main function to demonstrate PDF translation
     """
     # Set the path to Tesseract if needed
-    tesseract_path = r"D:\Clg Softwares\Tesseract-OCR\tesseract.exe"  # Change this to your Tesseract path or set to None
+    tesseract_path = r"C:/Program Files/Tesseract-OCR/tesseract.exe"  # Change this to your Tesseract path or set to None
     
     # Initialize the translation system with Bengali as the target language
     translator = PDFTranslationSystem(target_language="bn", tesseract_cmd=tesseract_path)

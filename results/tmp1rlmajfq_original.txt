@@ -1,0 +1,4 @@
+30 Words Version:
+This project presents a web application that extracts text from images, PDFs, and text files using
+PyTesseract and OpenCV, and translates it to a user-specified language using Hugging Face
+Transformers.

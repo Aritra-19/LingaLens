@@ -1,0 +1,8 @@
+80 Words Version:
+The project delivers a web-based application that enables text extraction from images, PDFs, or
+plain text using PyTesseract OCR with OpenCV-based preprocessing for enhanced accuracy. It
+translates extracted content into a language chosen by the user using Hugging Face Transformers,
+ensuring real-time, high-quality multilingual support. Designed with a user-friendly interface, the
+system addresses the need for cross-language communication, document accessibility, and
+information digitization, providing an efficient and reliable solution by integrating powerful AI and
+computer vision technologies.

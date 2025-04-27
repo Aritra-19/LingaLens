@@ -11,6 +11,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 from bson import json_util
 import tempfile
+import cv2
+import numpy as np
+
 # Import PDFTranslationSystem but handle potential import errors
 try:
     from utils.pdftry import PDFTranslationSystem
@@ -18,6 +21,15 @@ try:
 except ImportError as e:
     print(f"Warning: Could not import PDFTranslationSystem: {e}")
     PDF_TRANSLATOR_AVAILABLE = False
+
+# Import ImageCleaningSystem
+try:
+    from utils.cleaning import ImageCleaningSystem
+    IMAGE_CLEANER_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import ImageCleaningSystem: {e}")
+    IMAGE_CLEANER_AVAILABLE = False
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -61,6 +73,42 @@ def extract_text_from_pdf_fallback(pdf_path):
         return "PDF text extraction requires PyMuPDF (fitz) library."
     except Exception as e:
         return f"Error extracting text from PDF: {str(e)}"
+
+# Function to preprocess and extract text from images (fallback method if ImageCleaningSystem is not available)
+def preprocess_and_extract_text_fallback(image_path, language='eng'):
+    """
+    Preprocess an image and extract text using OCR
+    
+    Args:
+        image_path (str): Path to the image file
+        language (str): Language for OCR (default: 'eng')
+        
+    Returns:
+        str: Extracted text
+    """
+    try:
+        # Read image
+        image = cv2.imread(image_path)
+        if image is None:
+            return "Could not read image"
+            
+        # Convert to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
+        # Apply adaptive thresholding
+        preprocessed = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+            cv2.THRESH_BINARY, 31, 11
+        )
+        
+        # Extract text using pytesseract
+        custom_config = r'--oem 3 --psm 6'
+        text = pytesseract.image_to_string(preprocessed, lang=language, config=custom_config)
+        
+        return text
+    except Exception as e:
+        print(f"Error in image preprocessing: {e}")
+        return f"Error processing image: {str(e)}"
 
 @app.route('/')
 def index():
@@ -148,7 +196,18 @@ def allowed_file(filename):
 def process_image():
     try:
         target_language = request.form.get('language', 'en')
+        source_language = request.form.get('source_language', 'auto')
         original_text = ""
+        language_mapping = {
+            'en': 'eng',
+            'hi': 'hin',
+            'bn': 'ben',
+            'or': 'ori',
+            'auto': 'eng'  # Default to English for OCR if auto-detection
+        }
+        
+        # Get OCR language code for pytesseract
+        ocr_lang = language_mapping.get(source_language, 'eng')
 
         # Check if the request contains a file or text
         if 'image' in request.files:
@@ -190,9 +249,24 @@ def process_image():
                         if not pdf_translation_successful:
                             original_text = extract_text_from_pdf_fallback(file_path)
                     else:
-                        # Process image file using pytesseract
-                        img = Image.open(file_path)
-                        original_text = pytesseract.image_to_string(img)
+                        # Process image file using ImageCleaningSystem if available
+                        image_cleaning_successful = False
+                        
+                        if IMAGE_CLEANER_AVAILABLE:
+                            try:
+                                # Initialize the image cleaning system
+                                image_cleaner = ImageCleaningSystem(tesseract_cmd=tesseract_path)
+                                
+                                # Process the image and extract text
+                                original_text = image_cleaner.process_image(file_path, language=ocr_lang)
+                                image_cleaning_successful = True
+                            except Exception as img_error:
+                                print(f"Image cleaning system error: {img_error}")
+                                # Fall back to basic extraction
+                        
+                        # If ImageCleaningSystem failed or isn't available, use fallback method
+                        if not image_cleaning_successful:
+                            original_text = preprocess_and_extract_text_fallback(file_path, language=ocr_lang)
                 finally:
                     # Always clean up the temp file
                     if os.path.exists(file_path):
@@ -209,7 +283,10 @@ def process_image():
         if original_text.strip():
             try:
                 # Use googletrans for translation
-                translation = translator.translate(original_text, dest=target_language)
+                if source_language != 'auto':
+                    translation = translator.translate(original_text, src=source_language, dest=target_language)
+                else:
+                    translation = translator.translate(original_text, dest=target_language)
                 translated_text = translation.text
             except Exception as trans_error:
                 print(f"Translation error: {trans_error}")
